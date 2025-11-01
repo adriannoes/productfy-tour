@@ -51,76 +51,63 @@ export const IntegrationCode = ({ tour }: IntegrationCodeProps) => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Código de Integração</h2>
-            <p className="text-muted-foreground">
-              Adicione este código ao seu site para ativar o product tour
+            <h2 className="text-lg font-semibold text-foreground mb-2 tracking-tight">Integration Code</h2>
+            <p className="text-muted-foreground text-sm">
+              Add this snippet to your site
             </p>
           </div>
-          <Button onClick={copyToClipboard} className="bg-gradient-primary">
+          <Button onClick={copyToClipboard}>
             {copied ? (
               <>
                 <Check className="w-4 h-4 mr-2" />
-                Copiado!
+                Copied
               </>
             ) : (
               <>
                 <Copy className="w-4 h-4 mr-2" />
-                Copiar Código
+                Copy
               </>
             )}
           </Button>
         </div>
 
         <div className="relative">
-          <pre className="bg-muted p-6 rounded-lg overflow-x-auto">
-            <code className="text-sm text-foreground font-mono">{generateIntegrationCode()}</code>
+          <pre className="bg-card border border-border p-5 rounded-lg overflow-x-auto">
+            <code className="text-xs text-foreground/90 font-mono">{generateIntegrationCode()}</code>
           </pre>
         </div>
       </Card>
 
-      <Card className="p-6 bg-card/50 border-primary/20">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Instruções de Instalação</h3>
-        <ol className="space-y-3 text-muted-foreground">
+      <Card className="p-5">
+        <h3 className="text-sm font-medium text-foreground mb-4">Installation</h3>
+        <ol className="space-y-3 text-muted-foreground text-sm">
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+            <span className="flex-shrink-0 w-5 h-5 bg-muted text-foreground rounded flex items-center justify-center text-xs font-medium">
               1
             </span>
-            <span>Copie o código acima usando o botão "Copiar Código"</span>
+            <span>Copy the code snippet above</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+            <span className="flex-shrink-0 w-5 h-5 bg-muted text-foreground rounded flex items-center justify-center text-xs font-medium">
               2
             </span>
             <span>
-              Cole o código dentro da tag <code className="bg-muted px-2 py-1 rounded">&lt;head&gt;</code> do seu site
+              Paste it in your <code className="bg-muted px-1.5 py-0.5 rounded text-xs">&lt;head&gt;</code> tag
             </span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+            <span className="flex-shrink-0 w-5 h-5 bg-muted text-foreground rounded flex items-center justify-center text-xs font-medium">
               3
             </span>
-            <span>Certifique-se de que os seletores CSS correspondem aos elementos do seu site</span>
+            <span>Ensure CSS selectors match your site elements</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-6 h-6 bg-primary/20 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+            <span className="flex-shrink-0 w-5 h-5 bg-muted text-foreground rounded flex items-center justify-center text-xs font-medium">
               4
             </span>
-            <span>Teste o tour acessando seu site e verificando se o tour é exibido corretamente</span>
+            <span>Test the tour on your site</span>
           </li>
         </ol>
-      </Card>
-
-      <Card className="p-6 bg-accent/10 border-accent/20">
-        <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
-          <span className="text-accent">⚡</span>
-          Dica Profissional
-        </h3>
-        <p className="text-muted-foreground">
-          Para uma integração mais avançada, você pode usar nossa API JavaScript para controlar o tour
-          programaticamente. Chame <code className="bg-muted px-2 py-1 rounded">TourFlow.start()</code> para
-          iniciar o tour manualmente ou <code className="bg-muted px-2 py-1 rounded">TourFlow.stop()</code> para
-          interrompê-lo.
-        </p>
       </Card>
     </div>
   );

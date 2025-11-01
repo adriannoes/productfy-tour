@@ -56,17 +56,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-gradient-dark">
-        <div className="container mx-auto px-6 py-4">
+      <header className="border-b border-border">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              <div className="w-8 h-8 bg-foreground rounded-md flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-background" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">TourFlow</h1>
-                <p className="text-xs text-muted-foreground">Product Tour Builder</p>
-              </div>
+              <h1 className="text-lg font-semibold text-foreground tracking-tight">TourFlow</h1>
             </div>
 
             <div className="flex items-center gap-2">
@@ -111,17 +108,17 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-12">
         {view === "list" && (
           <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-12">
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-1">Seus Product Tours</h2>
-                <p className="text-muted-foreground">Crie e gerencie tours interativos para guiar seus usuários</p>
+                <h2 className="text-3xl font-semibold text-foreground mb-2 tracking-tight">Tours</h2>
+                <p className="text-muted-foreground text-sm">Crie e gerencie tours interativos</p>
               </div>
-              <Button onClick={createNewTour} size="lg" className="bg-gradient-primary hover:opacity-90">
-                <Plus className="w-5 h-5 mr-2" />
-                Novo Tour
+              <Button onClick={createNewTour} size="lg">
+                <Plus className="w-4 h-4 mr-2" />
+                New Tour
               </Button>
             </div>
             <ToursList

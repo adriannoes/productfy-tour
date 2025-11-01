@@ -54,14 +54,14 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Tour Settings */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Configurações do Tour</h2>
-          <Button onClick={saveTour} className="bg-gradient-primary">
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Settings</h2>
+          <Button onClick={saveTour}>
             <Save className="w-4 h-4 mr-2" />
-            Salvar
+            Save
           </Button>
         </div>
 
@@ -93,22 +93,22 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
 
       {/* Steps Editor */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-foreground">Etapas do Tour</h3>
-          <Button onClick={addStep} variant="outline">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-foreground tracking-tight">Steps</h3>
+          <Button onClick={addStep} variant="outline" size="sm">
             <Plus className="w-4 h-4 mr-2" />
-            Adicionar Etapa
+            Add Step
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {editedTour.steps.map((step, index) => (
-            <Card key={step.id} className="p-6">
+            <Card key={step.id} className="p-5">
               <div className="flex items-start gap-4">
-                <div className="flex items-center gap-2 pt-2">
-                  <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold text-primary">{index + 1}</span>
+                <div className="flex items-center gap-3 pt-2">
+                  <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
+                  <div className="w-6 h-6 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-medium text-foreground">{index + 1}</span>
                   </div>
                 </div>
 
@@ -180,9 +180,9 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
           ))}
 
           {editedTour.steps.length === 0 && (
-            <Card className="p-12 text-center border-dashed">
-              <p className="text-muted-foreground">
-                Nenhuma etapa adicionada ainda. Clique em "Adicionar Etapa" para começar.
+            <Card className="p-12 text-center">
+              <p className="text-muted-foreground text-sm">
+                No steps yet. Add your first step to get started.
               </p>
             </Card>
           )}
