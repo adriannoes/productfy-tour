@@ -5,6 +5,7 @@ import { ToursList } from "@/components/ToursList";
 import { TourEditor } from "@/components/TourEditor";
 import { TourPreview } from "@/components/TourPreview";
 import { IntegrationCode } from "@/components/IntegrationCode";
+import { useTours, useCreateTour, useDeleteTour } from "@/integrations/supabase/hooks/useTours";
 
 export type Tour = {
   id: string;
@@ -23,30 +24,39 @@ export type TourStep = {
 };
 
 const Index = () => {
-  const [tours, setTours] = useState<Tour[]>([]);
+  const { data: tours = [], isLoading } = useTours();
+  const createTourMutation = useCreateTour();
+  const deleteTourMutation = useDeleteTour();
+  
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [view, setView] = useState<"list" | "editor" | "preview" | "code">("list");
 
   const createNewTour = () => {
-    const newTour: Tour = {
-      id: Date.now().toString(),
+    const newTour: Omit<Tour, "id" | "createdAt"> = {
       name: "Novo Tour",
       steps: [],
       isActive: false,
-      createdAt: new Date(),
     };
-    setTours([...tours, newTour]);
-    setSelectedTour(newTour);
-    setView("editor");
+    createTourMutation.mutate(newTour, {
+      onSuccess: (data: any) => {
+        setSelectedTour({
+          id: data.id,
+          name: data.name,
+          steps: [],
+          isActive: data.is_active,
+          createdAt: new Date(data.created_at),
+        });
+        setView("editor");
+      },
+    });
   };
 
   const updateTour = (updatedTour: Tour) => {
-    setTours(tours.map((t) => (t.id === updatedTour.id ? updatedTour : t)));
     setSelectedTour(updatedTour);
   };
 
   const deleteTour = (tourId: string) => {
-    setTours(tours.filter((t) => t.id !== tourId));
+    deleteTourMutation.mutate(tourId);
     if (selectedTour?.id === tourId) {
       setSelectedTour(null);
       setView("list");
@@ -123,6 +133,7 @@ const Index = () => {
             </div>
             <ToursList
               tours={tours}
+              isLoading={isLoading}
               onSelectTour={(tour) => {
                 setSelectedTour(tour);
                 setView("editor");

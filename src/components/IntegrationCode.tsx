@@ -13,28 +13,35 @@ export const IntegrationCode = ({ tour }: IntegrationCodeProps) => {
   const [copied, setCopied] = useState(false);
 
   const generateIntegrationCode = () => {
-    const tourData = JSON.stringify(tour, null, 2);
+    const apiUrl = `https://sfokolgauqfppgymcyae.supabase.co/functions/v1/get-tour?tourId=${tour.id}`;
     
     return `<!-- TourFlow Integration -->
-<script>
-  window.tourFlowConfig = ${tourData};
-</script>
 <script src="https://cdn.tourflow.app/widget.js"></script>
 <link rel="stylesheet" href="https://cdn.tourflow.app/widget.css" />
 
 <script>
   // Initialize TourFlow
-  document.addEventListener('DOMContentLoaded', function() {
-    TourFlow.init({
-      tourId: '${tour.id}',
-      autoStart: ${tour.isActive},
-      onComplete: function() {
-        console.log('Tour completed!');
-      },
-      onSkip: function() {
-        console.log('Tour skipped!');
-      }
-    });
+  document.addEventListener('DOMContentLoaded', async function() {
+    try {
+      // Fetch tour data from API
+      const response = await fetch('${apiUrl}');
+      const tourData = await response.json();
+      
+      // Initialize tour
+      TourFlow.init({
+        tourId: '${tour.id}',
+        tourData: tourData,
+        autoStart: ${tour.isActive},
+        onComplete: function() {
+          console.log('Tour completed!');
+        },
+        onSkip: function() {
+          console.log('Tour skipped!');
+        }
+      });
+    } catch (error) {
+      console.error('Failed to load tour:', error);
+    }
   });
 </script>`;
   };

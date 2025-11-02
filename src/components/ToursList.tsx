@@ -2,17 +2,33 @@ import { Tour } from "@/pages/Index";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 type ToursListProps = {
   tours: Tour[];
+  isLoading: boolean;
   onSelectTour: (tour: Tour) => void;
   onDeleteTour: (tourId: string) => void;
 };
 
-export const ToursList = ({ tours, onSelectTour, onDeleteTour }: ToursListProps) => {
+export const ToursList = ({ tours, isLoading, onSelectTour, onDeleteTour }: ToursListProps) => {
+  if (isLoading) {
+    return (
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="p-5">
+            <Skeleton className="h-4 w-32 mb-2" />
+            <Skeleton className="h-3 w-20 mb-4" />
+            <Skeleton className="h-3 w-full" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   if (tours.length === 0) {
     return (
       <Card className="p-16 text-center">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tour, TourStep } from "@/pages/Index";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, GripVertical, Save } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
+import { useUpdateTour } from "@/integrations/supabase/hooks/useTours";
 
 type TourEditorProps = {
   tour: Tour;
@@ -17,6 +17,11 @@ type TourEditorProps = {
 
 export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
   const [editedTour, setEditedTour] = useState<Tour>(tour);
+  const updateTourMutation = useUpdateTour();
+
+  useEffect(() => {
+    setEditedTour(tour);
+  }, [tour]);
 
   const addStep = () => {
     const newStep: TourStep = {
@@ -49,8 +54,11 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
   };
 
   const saveTour = () => {
-    onUpdateTour(editedTour);
-    toast.success("Tour salvo com sucesso!");
+    updateTourMutation.mutate(editedTour, {
+      onSuccess: () => {
+        onUpdateTour(editedTour);
+      },
+    });
   };
 
   return (
