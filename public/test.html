@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TourFlow Widget Test</title>
+  <script src="/widget.js"></script>
+  <link rel="stylesheet" href="/widget.css">
+  <style>
+    body {
+      padding: 40px;
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .demo-section {
+      margin: 40px 0;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #f3f4f6;
+    }
+    .controls {
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
+    }
+    .controls button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 TourFlow Widget Test Page</h1>
+    <p>Test the TourFlow widget with different configurations and scenarios.</p>
+
+    <div class="controls">
+      <h3>Widget Controls</h3>
+      <button onclick="startTour()">▶️ Start Tour</button>
+      <button onclick="stopTour()">⏹️ Stop Tour</button>
+      <button onclick="resetTour()">🔄 Reset Tour (Clear LocalStorage)</button>
+      <button onclick="destroyTour()">❌ Destroy Widget</button>
+    </div>
+
+    <div class="demo-section">
+      <h2 id="test-heading">Welcome Section</h2>
+      <p>This is a demo page to test the TourFlow widget. Click the buttons above to control the tour.</p>
+      <button id="test-button-1">Test Button 1</button>
+    </div>
+
+    <div class="demo-section">
+      <h2>Feature Section</h2>
+      <p>Explore the interactive features of this demo application.</p>
+      <button id="test-button-2">Test Button 2</button>
+    </div>
+
+    <div class="demo-section">
+      <h2>Settings Section</h2>
+      <p>Configure your preferences and customize your experience.</p>
+      <button id="test-button-3">Test Button 3</button>
+    </div>
+
+    <div class="demo-section">
+      <h2>Final Section</h2>
+      <p>Complete your journey through this guided tour.</p>
+      <button id="test-button-4">Test Button 4</button>
+    </div>
+  </div>
+
+  <script>
+    let tourInstance;
+
+    // Tour data mockado
+    const mockTourData = {
+      id: 'test-tour-123',
+      name: 'Demo Tour',
+      steps: [
+        {
+          title: '👋 Welcome to TourFlow!',
+          content: 'This is the first step of your interactive tour. Let us guide you through the features.',
+          target: '#test-heading',
+          placement: 'bottom'
+        },
+        {
+          title: '🎯 First Feature',
+          content: 'Click this button to explore our first amazing feature.',
+          target: '#test-button-1',
+          placement: 'bottom'
+        },
+        {
+          title: '✨ Second Feature',
+          content: 'Now let\'s check out the second feature. It\'s even better!',
+          target: '#test-button-2',
+          placement: 'top'
+        },
+        {
+          title: '⚙️ Settings',
+          content: 'Here you can customize your experience to your liking.',
+          target: '#test-button-3',
+          placement: 'left'
+        },
+        {
+          title: '🎉 Tour Complete!',
+          content: 'Congratulations! You\'ve completed the tour. Click Done to finish.',
+          target: '#test-button-4',
+          placement: 'top'
+        }
+      ]
+    };
+
+    // Inicializar tour automaticamente ao carregar a página
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Initializing TourFlow...');
+      
+      tourInstance = TourFlow.init({
+        tourId: 'test-tour-123',
+        tourData: mockTourData,
+        autoStart: false, // Não iniciar automaticamente
+        overlay: true,
+        highlightPadding: 10,
+        scrollBehavior: 'smooth',
+        onComplete: function() {
+          console.log('✅ Tour completed!');
+          alert('🎉 Tour completed! You can reset it using the Reset button.');
+        },
+        onSkip: function(currentStep) {
+          console.log('⏭️ Tour skipped at step:', currentStep);
+          alert('Tour stopped at step ' + (currentStep + 1));
+        },
+        onStepChange: function(step, index) {
+          console.log('📍 Step changed:', index + 1, step.title);
+        }
+      });
+
+      console.log('✅ TourFlow initialized. Click "Start Tour" to begin.');
+    });
+
+    function startTour() {
+      if (TourFlow) {
+        TourFlow.start();
+        console.log('▶️ Tour started');
+      }
+    }
+
+    function stopTour() {
+      if (TourFlow) {
+        TourFlow.stop();
+        console.log('⏹️ Tour stopped');
+      }
+    }
+
+    function resetTour() {
+      if (TourFlow) {
+        TourFlow.reset();
+        console.log('🔄 Tour reset - localStorage cleared');
+        alert('Tour reset! You can now start it again.');
+      }
+    }
+
+    function destroyTour() {
+      if (TourFlow) {
+        TourFlow.destroy();
+        console.log('❌ Tour destroyed');
+        alert('Widget destroyed. Refresh the page to initialize again.');
+      }
+    }
+  </script>
+</body>
+</html>

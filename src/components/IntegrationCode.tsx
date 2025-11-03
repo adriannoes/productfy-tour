@@ -16,8 +16,8 @@ export const IntegrationCode = ({ tour }: IntegrationCodeProps) => {
     const apiUrl = `https://sfokolgauqfppgymcyae.supabase.co/functions/v1/get-tour?tourId=${tour.id}`;
     
     return `<!-- TourFlow Integration -->
-<script src="https://cdn.tourflow.app/widget.js"></script>
-<link rel="stylesheet" href="https://cdn.tourflow.app/widget.css" />
+<script src="${window.location.origin}/widget.js"></script>
+<link rel="stylesheet" href="${window.location.origin}/widget.css" />
 
 <script>
   // Initialize TourFlow
