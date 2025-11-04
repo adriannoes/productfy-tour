@@ -5,8 +5,10 @@ import { ToursList } from "@/components/ToursList";
 import { TourEditor } from "@/components/TourEditor";
 import { TourPreview } from "@/components/TourPreview";
 import { IntegrationCode } from "@/components/IntegrationCode";
-import { TourAnalytics } from "@/components/TourAnalytics";
 import { useTours, useCreateTour, useDeleteTour } from "@/integrations/supabase/hooks/useTours";
+import { lazy, Suspense } from "react";
+
+const TourAnalytics = lazy(() => import("@/components/TourAnalytics").then(m => ({ default: m.TourAnalytics })));
 
 export type Tour = {
   id: string;
@@ -172,7 +174,9 @@ const Index = () => {
 
         {view === "analytics" && selectedTour && (
           <div className="animate-fade-in">
-            <TourAnalytics tourId={selectedTour.id} />
+            <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-muted-foreground">Carregando...</p></div>}>
+              <TourAnalytics tourId={selectedTour.id} />
+            </Suspense>
           </div>
         )}
       </main>
