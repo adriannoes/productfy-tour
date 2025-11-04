@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Eye, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 
@@ -36,98 +36,104 @@ export const TourAnalytics = ({ tourId }: TourAnalyticsProps) => {
   const totalSkips = analytics?.filter(a => a.event_type === 'skip').length || 0;
   const completionRate = totalViews > 0 ? ((totalCompletes / totalViews) * 100).toFixed(1) : '0';
 
-  // Aggregate step views
   const stepViews = analytics
     ?.filter(a => a.event_type === 'step_view')
     .reduce((acc, curr) => {
       const step = curr.step_index ?? 0;
       acc[step] = (acc[step] || 0) + 1;
       return acc;
-    }, {} as Record<number, number>) || {};
+    }, {} as Record<number, number>);
 
-  const stepData = Object.entries(stepViews).map(([step, count]) => ({
-    step: `Step ${parseInt(step) + 1}`,
-    views: count
-  }));
+  const stepData = Object.entries(stepViews || {})
+    .map(([step, count]) => ({
+      step: `Step ${parseInt(step) + 1}`,
+      views: count
+    }))
+    .sort((a, b) => {
+      const stepA = parseInt(a.step.replace('Step ', ''));
+      const stepB = parseInt(b.step.replace('Step ', ''));
+      return stepA - stepB;
+    });
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Visualizações</CardTitle>
-            <Eye className="w-4 h-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalViews}</div>
-            <p className="text-xs text-muted-foreground">Total de visualizações do tour</p>
-          </CardContent>
+    <div className="space-y-6 animate-fade-in">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-500/10 rounded-lg">
+              <Eye className="w-6 h-6 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Visualizações</p>
+              <p className="text-2xl font-bold">{totalViews}</p>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completados</CardTitle>
-            <CheckCircle className="w-4 h-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCompletes}</div>
-            <p className="text-xs text-muted-foreground">Tours completados</p>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-500/10 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Completados</p>
+              <p className="text-2xl font-bold">{totalCompletes}</p>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pulados</CardTitle>
-            <XCircle className="w-4 h-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalSkips}</div>
-            <p className="text-xs text-muted-foreground">Tours abandonados</p>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-500/10 rounded-lg">
+              <XCircle className="w-6 h-6 text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Pulados</p>
+              <p className="text-2xl font-bold">{totalSkips}</p>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Conclusão</CardTitle>
-            <TrendingUp className="w-4 h-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completionRate}%</div>
-            <p className="text-xs text-muted-foreground">Usuários que completaram</p>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/10 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-purple-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Taxa de Conclusão</p>
+              <p className="text-2xl font-bold">{completionRate}%</p>
+            </div>
+          </div>
         </Card>
       </div>
 
-      {stepData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Visualizações por Step</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stepData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="step" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                />
-                <Bar dataKey="views" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
+      {stepData.length > 0 ? (
+        <Card className="p-6">
+          <h3 className="font-semibold mb-6 text-lg">Visualizações por Step</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={stepData}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="step" className="text-xs" />
+              <YAxis className="text-xs" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Bar dataKey="views" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </Card>
-      )}
-
-      {analytics && analytics.length === 0 && (
-        <Card>
-          <CardContent className="flex items-center justify-center h-40">
-            <p className="text-muted-foreground">Nenhum dado de analytics disponível ainda</p>
-          </CardContent>
+      ) : (
+        <Card className="p-12">
+          <div className="text-center">
+            <p className="text-muted-foreground">Nenhum dado de visualização de steps ainda.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Os dados aparecerão quando usuários interagirem com o tour.
+            </p>
+          </div>
         </Card>
       )}
     </div>

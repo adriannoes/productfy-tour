@@ -19,7 +19,7 @@ serve(async (req) => {
 
     const { tourId, eventType, stepIndex, userIdentifier, metadata } = await req.json();
 
-    console.log('Tracking event:', { tourId, eventType, stepIndex, userIdentifier });
+    console.log('Track event:', { tourId, eventType, stepIndex, userIdentifier });
 
     if (!tourId || !eventType) {
       return new Response(
@@ -28,7 +28,6 @@ serve(async (req) => {
       );
     }
 
-    // Insert event
     const { error } = await supabase
       .from('tour_analytics')
       .insert({
@@ -40,9 +39,11 @@ serve(async (req) => {
       });
 
     if (error) {
-      console.error('Error inserting event:', error);
+      console.error('Insert error:', error);
       throw error;
     }
+
+    console.log('Event tracked successfully');
 
     return new Response(
       JSON.stringify({ success: true }),
