@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      tour_analytics: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          step_index: number | null
+          tour_id: string
+          user_identifier: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          step_index?: number | null
+          tour_id: string
+          user_identifier?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          step_index?: number | null
+          tour_id?: string
+          user_identifier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_analytics_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tour_steps: {
         Row: {
           content: string

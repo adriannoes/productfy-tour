@@ -2,3 +2,6 @@ project_id = "sfokolgauqfppgymcyae"
 
 [functions.get-tour]
 verify_jwt = false
+
+[functions.track-event]
+verify_jwt = false

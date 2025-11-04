@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Plus, Eye, Code, Settings, Sparkles } from "lucide-react";
+import { Plus, Eye, Code, Settings, Sparkles, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToursList } from "@/components/ToursList";
 import { TourEditor } from "@/components/TourEditor";
 import { TourPreview } from "@/components/TourPreview";
 import { IntegrationCode } from "@/components/IntegrationCode";
+import { TourAnalytics } from "@/components/TourAnalytics";
 import { useTours, useCreateTour, useDeleteTour } from "@/integrations/supabase/hooks/useTours";
 
 export type Tour = {
@@ -29,7 +30,7 @@ const Index = () => {
   const deleteTourMutation = useDeleteTour();
   
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
-  const [view, setView] = useState<"list" | "editor" | "preview" | "code">("list");
+  const [view, setView] = useState<"list" | "editor" | "preview" | "code" | "analytics">("list");
 
   const createNewTour = () => {
     const newTour: Omit<Tour, "id" | "createdAt"> = {
@@ -110,6 +111,14 @@ const Index = () => {
                     <Code className="w-4 h-4 mr-2" />
                     Código
                   </Button>
+                  <Button
+                    variant={view === "analytics" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setView("analytics")}
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Analytics
+                  </Button>
                 </>
               )}
             </div>
@@ -158,6 +167,12 @@ const Index = () => {
         {view === "code" && selectedTour && (
           <div className="animate-fade-in">
             <IntegrationCode tour={selectedTour} />
+          </div>
+        )}
+
+        {view === "analytics" && selectedTour && (
+          <div className="animate-fade-in">
+            <TourAnalytics tourId={selectedTour.id} />
           </div>
         )}
       </main>

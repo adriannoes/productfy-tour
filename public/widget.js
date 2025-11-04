@@ -70,10 +70,16 @@
     state.currentStep = 0;
     createTourElements();
     showStep(0);
+    
+    // Track tour view
+    trackEvent('view');
   };
 
   TourFlow.stop = function() {
     if (!state.isActive) return;
+    
+    // Track skip event
+    trackEvent('skip', state.currentStep);
     
     state.isActive = false;
     removeTourElements();
@@ -120,6 +126,44 @@
   };
 
   // ============= FUNÇÕES INTERNAS =============
+
+  // Tracking functions
+  async function trackEvent(eventType, stepIndex = null, metadata = {}) {
+    if (!state.tourData || !state.tourData.id) return;
+    
+    try {
+      const userId = getUserIdentifier();
+      
+      await fetch(
+        'https://sfokolgauqfppgymcyae.supabase.co/functions/v1/track-event',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tourId: state.tourData.id,
+            eventType,
+            stepIndex,
+            userIdentifier: userId,
+            metadata
+          })
+        }
+      );
+    } catch (error) {
+      console.warn('TourFlow: Failed to track event', error);
+    }
+  }
+
+  function getUserIdentifier() {
+    const key = 'tourflow_user_id';
+    let userId = localStorage.getItem(key);
+    
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9) + Date.now();
+      localStorage.setItem(key, userId);
+    }
+    
+    return userId;
+  }
 
   async function fetchTourData(tourId) {
     try {
@@ -195,6 +239,9 @@
     const step = state.tourData.steps[index];
     const isFirst = index === 0;
     const isLast = index === state.tourData.steps.length - 1;
+
+    // Track step view
+    trackEvent('step_view', index, { target: step.target });
 
     // Atualizar conteúdo do tooltip
     state.elements.tooltip.querySelector('.tourflow-step-counter').textContent = 
@@ -319,6 +366,9 @@
   }
 
   function completeTour() {
+    // Track completion
+    trackEvent('complete');
+    
     markTourCompleted();
     removeTourElements();
     state.isActive = false;
