@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { Plus, Eye, Code, Settings, Sparkles, BarChart3 } from "lucide-react";
+import { useState, lazy, Suspense } from "react";
+import { Plus, Eye, Code, Settings, Sparkles, BarChart3, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToursList } from "@/components/ToursList";
 import { TourEditor } from "@/components/TourEditor";
 import { TourPreview } from "@/components/TourPreview";
 import { IntegrationCode } from "@/components/IntegrationCode";
+import { Auth } from "@/components/Auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTours, useCreateTour, useDeleteTour } from "@/integrations/supabase/hooks/useTours";
-import { lazy, Suspense } from "react";
 
 const TourAnalytics = lazy(() => import("@/components/TourAnalytics").then(m => ({ default: m.TourAnalytics })));
 
@@ -27,12 +28,25 @@ export type TourStep = {
 };
 
 const Index = () => {
+  const { user, loading: authLoading, signOut } = useAuth();
   const { data: tours = [], isLoading } = useTours();
   const createTourMutation = useCreateTour();
   const deleteTourMutation = useDeleteTour();
   
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [view, setView] = useState<"list" | "editor" | "preview" | "code" | "analytics">("list");
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
 
   const createNewTour = () => {
     const newTour: Omit<Tour, "id" | "createdAt"> = {
@@ -77,9 +91,21 @@ const Index = () => {
                 <Sparkles className="w-4 h-4 text-background" />
               </div>
               <h1 className="text-lg font-semibold text-foreground tracking-tight">TourFlow</h1>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                {user.email}
+              </span>
             </div>
 
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                className="gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sair</span>
+              </Button>
               <Button
                 variant={view === "list" ? "default" : "ghost"}
                 size="sm"
