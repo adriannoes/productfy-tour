@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
-import { Plus, Eye, Code, Settings, Sparkles, BarChart3, LogOut } from "lucide-react";
+import { Plus, Eye, Code, Settings, Sparkles, BarChart3, LogOut, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { ToursList } from "@/components/ToursList";
 import { TourEditor } from "@/components/TourEditor";
@@ -29,6 +30,7 @@ export type TourStep = {
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { data: tours = [], isLoading } = useTours();
   const createTourMutation = useCreateTour();
   const deleteTourMutation = useDeleteTour();
@@ -97,6 +99,14 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                title={theme === "dark" ? "Modo Claro" : "Modo Escuro"}
+              >
+                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
