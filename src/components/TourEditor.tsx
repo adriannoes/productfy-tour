@@ -6,18 +6,150 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, GripVertical, Save } from "lucide-react";
+import { Plus, Trash2, GripVertical, Save, Copy } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useUpdateTour } from "@/integrations/supabase/hooks/useTours";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type TourEditorProps = {
   tour: Tour;
   onUpdateTour: (tour: Tour) => void;
 };
 
+interface SortableStepProps {
+  step: TourStep;
+  index: number;
+  onUpdate: (stepId: string, updates: Partial<TourStep>) => void;
+  onDelete: (stepId: string) => void;
+  onDuplicate: (stepId: string) => void;
+}
+
+function SortableStep({ step, index, onUpdate, onDelete, onDuplicate }: SortableStepProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: step.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <Card ref={setNodeRef} style={style} className="p-5">
+      <div className="flex items-start gap-4">
+        <div className="flex items-center gap-3 pt-2">
+          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+            <GripVertical className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <span className="text-sm font-semibold text-foreground bg-accent px-2 py-1 rounded">
+            {index + 1}
+          </span>
+        </div>
+
+        <div className="flex-1 grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Título</Label>
+            <Input
+              value={step.title}
+              onChange={(e) => onUpdate(step.id, { title: e.target.value })}
+              placeholder="Ex: Bem-vindo ao Dashboard"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Seletor CSS</Label>
+            <Input
+              value={step.target}
+              onChange={(e) => onUpdate(step.id, { target: e.target.value })}
+              placeholder="Ex: #meu-botao ou .minha-classe"
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label>Conteúdo</Label>
+            <Textarea
+              value={step.content}
+              onChange={(e) => onUpdate(step.id, { content: e.target.value })}
+              placeholder="Descreva o que o usuário deve fazer aqui"
+              className="min-h-[80px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Posição</Label>
+            <Select
+              value={step.placement}
+              onValueChange={(value: any) => onUpdate(step.id, { placement: value })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="top">Topo</SelectItem>
+                <SelectItem value="bottom">Baixo</SelectItem>
+                <SelectItem value="left">Esquerda</SelectItem>
+                <SelectItem value="right">Direita</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 pt-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onDuplicate(step.id)}
+            title="Duplicar step"
+          >
+            <Copy className="w-4 h-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onDelete(step.id)}
+            className="text-destructive hover:text-destructive"
+            title="Deletar step"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
   const [editedTour, setEditedTour] = useState<Tour>(tour);
   const updateTourMutation = useUpdateTour();
+  const { toast } = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     setEditedTour(tour);
@@ -37,6 +169,31 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
     });
   };
 
+  const duplicateStep = (stepId: string) => {
+    const stepToDuplicate = editedTour.steps.find(s => s.id === stepId);
+    if (!stepToDuplicate) return;
+
+    const newStep: TourStep = {
+      ...stepToDuplicate,
+      id: Date.now().toString(),
+      title: `${stepToDuplicate.title} (Cópia)`,
+    };
+
+    const stepIndex = editedTour.steps.findIndex(s => s.id === stepId);
+    const newSteps = [...editedTour.steps];
+    newSteps.splice(stepIndex + 1, 0, newStep);
+
+    setEditedTour({
+      ...editedTour,
+      steps: newSteps,
+    });
+
+    toast({
+      title: "Step duplicado",
+      description: "O step foi duplicado com sucesso.",
+    });
+  };
+
   const updateStep = (stepId: string, updates: Partial<TourStep>) => {
     setEditedTour({
       ...editedTour,
@@ -51,6 +208,26 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
       ...editedTour,
       steps: editedTour.steps.filter((step) => step.id !== stepId),
     });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = editedTour.steps.findIndex((step) => step.id === active.id);
+      const newIndex = editedTour.steps.findIndex((step) => step.id === over.id);
+
+      const newSteps = arrayMove(editedTour.steps, oldIndex, newIndex);
+      setEditedTour({
+        ...editedTour,
+        steps: newSteps,
+      });
+
+      toast({
+        title: "Ordem atualizada",
+        description: "A ordem dos steps foi atualizada.",
+      });
+    }
   };
 
   const saveTour = () => {
@@ -109,92 +286,37 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
           </Button>
         </div>
 
-        <div className="space-y-3">
-          {editedTour.steps.map((step, index) => (
-            <Card key={step.id} className="p-5">
-              <div className="flex items-start gap-4">
-                <div className="flex items-center gap-3 pt-2">
-                  <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
-                  <div className="w-6 h-6 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-medium text-foreground">{index + 1}</span>
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Título</Label>
-                      <Input
-                        value={step.title}
-                        onChange={(e) => updateStep(step.id, { title: e.target.value })}
-                        placeholder="Ex: Bem-vindo!"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Seletor CSS</Label>
-                      <Input
-                        value={step.target}
-                        onChange={(e) => updateStep(step.id, { target: e.target.value })}
-                        placeholder="Ex: #header-button"
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Conteúdo</Label>
-                    <Textarea
-                      value={step.content}
-                      onChange={(e) => updateStep(step.id, { content: e.target.value })}
-                      placeholder="Explique o que o usuário deve fazer..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="space-y-2 flex-1">
-                      <Label>Posição</Label>
-                      <Select
-                        value={step.placement}
-                        onValueChange={(value: any) =>
-                          updateStep(step.id, { placement: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="top">Acima</SelectItem>
-                          <SelectItem value="bottom">Abaixo</SelectItem>
-                          <SelectItem value="left">Esquerda</SelectItem>
-                          <SelectItem value="right">Direita</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteStep(step.id)}
-                      className="hover:text-destructive mt-7"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+        {editedTour.steps.length === 0 ? (
+          <Card className="p-12 text-center">
+            <p className="text-muted-foreground mb-4">
+              Nenhum step adicionado ainda. Clique em "Add Step" para começar.
+            </p>
+          </Card>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={editedTour.steps.map(s => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {editedTour.steps.map((step, index) => (
+                  <SortableStep
+                    key={step.id}
+                    step={step}
+                    index={index}
+                    onUpdate={updateStep}
+                    onDelete={deleteStep}
+                    onDuplicate={duplicateStep}
+                  />
+                ))}
               </div>
-            </Card>
-          ))}
-
-          {editedTour.steps.length === 0 && (
-            <Card className="p-12 text-center">
-              <p className="text-muted-foreground text-sm">
-                No steps yet. Add your first step to get started.
-              </p>
-            </Card>
-          )}
-        </div>
+            </SortableContext>
+          </DndContext>
+        )}
       </div>
     </div>
   );

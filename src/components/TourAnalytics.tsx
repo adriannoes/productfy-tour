@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Eye, CheckCircle, XCircle, TrendingUp } from "lucide-react";
+import { Eye, CheckCircle, XCircle, TrendingUp, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface TourAnalyticsProps {
   tourId: string;
 }
 
 export const TourAnalytics = ({ tourId }: TourAnalyticsProps) => {
+  const { toast } = useToast();
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['tour-analytics', tourId],
     queryFn: async () => {
@@ -22,6 +25,46 @@ export const TourAnalytics = ({ tourId }: TourAnalyticsProps) => {
       return data;
     }
   });
+
+  const exportToCSV = () => {
+    if (!analytics || analytics.length === 0) {
+      toast({
+        title: "Sem dados",
+        description: "Não há dados de analytics para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ['Event Type', 'Step Index', 'User Identifier', 'Created At', 'Metadata'];
+    const rows = analytics.map(a => [
+      a.event_type,
+      a.step_index ?? 'N/A',
+      a.user_identifier ?? 'Anonymous',
+      new Date(a.created_at || '').toLocaleString(),
+      JSON.stringify(a.metadata || {}),
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `tour_analytics_${tourId}_${Date.now()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Exportado com sucesso",
+      description: "Os dados de analytics foram exportados para CSV.",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -57,6 +100,13 @@ export const TourAnalytics = ({ tourId }: TourAnalyticsProps) => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <div className="flex justify-end">
+        <Button onClick={exportToCSV} variant="outline" size="sm">
+          <Download className="w-4 h-4 mr-2" />
+          Exportar CSV
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-6">
           <div className="flex items-center gap-3">
