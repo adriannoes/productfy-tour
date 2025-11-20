@@ -18,6 +18,12 @@ export type Tour = {
   steps: TourStep[];
   isActive: boolean;
   createdAt: Date;
+  theme?: {
+    primaryColor: string;
+    backgroundColor: string;
+    textColor: string;
+    borderRadius: string;
+  };
 };
 
 export type TourStep = {

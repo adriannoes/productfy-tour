@@ -16,6 +16,7 @@ export const useTours = () => {
           is_active,
           created_at,
           updated_at,
+          theme,
           tour_steps (
             id,
             title,
@@ -35,6 +36,7 @@ export const useTours = () => {
         name: tour.name,
         isActive: tour.is_active,
         createdAt: new Date(tour.created_at),
+        theme: tour.theme as any,
         steps: (tour.tour_steps || [])
           .sort((a: any, b: any) => a.step_order - b.step_order)
           .map((step: any) => ({
@@ -68,6 +70,7 @@ export const useCreateTour = () => {
           name: tour.name,
           is_active: tour.isActive,
           user_id: user.id,
+          theme: tour.theme || null,
         })
         .select()
         .single();
@@ -117,6 +120,7 @@ export const useUpdateTour = () => {
         .update({
           name: tour.name,
           is_active: tour.isActive,
+          theme: tour.theme || null,
         })
         .eq("id", tour.id);
 
