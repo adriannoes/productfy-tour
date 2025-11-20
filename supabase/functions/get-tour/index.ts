@@ -38,6 +38,7 @@ Deno.serve(async (req) => {
         id,
         name,
         is_active,
+        theme,
         tour_steps (
           id,
           title,
@@ -66,6 +67,7 @@ Deno.serve(async (req) => {
     const response = {
       id: tour.id,
       name: tour.name,
+      theme: tour.theme,
       steps: sortedSteps.map((step: any) => ({
         title: step.title,
         content: step.content,

@@ -10,6 +10,7 @@ import { Plus, Trash2, GripVertical, Save, Copy } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useUpdateTour } from "@/integrations/supabase/hooks/useTours";
 import { useToast } from "@/hooks/use-toast";
+import { ThemePicker } from "@/components/ThemePicker";
 import {
   DndContext,
   closestCenter,
@@ -275,6 +276,17 @@ export const TourEditor = ({ tour, onUpdateTour }: TourEditorProps) => {
           </div>
         </div>
       </Card>
+
+      {/* Theme Picker */}
+      <ThemePicker
+        theme={editedTour.theme || {
+          primaryColor: "#3b82f6",
+          backgroundColor: "#ffffff",
+          textColor: "#1e293b",
+          borderRadius: "8px"
+        }}
+        onThemeChange={(theme) => setEditedTour({ ...editedTour, theme })}
+      />
 
       {/* Steps Editor */}
       <div>

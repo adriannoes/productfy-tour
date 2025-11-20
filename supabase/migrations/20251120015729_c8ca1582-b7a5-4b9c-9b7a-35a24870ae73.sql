@@ -1,0 +1,2 @@
+-- Add theme column to tours table for widget customization
+ALTER TABLE tours ADD COLUMN IF NOT EXISTS theme JSONB DEFAULT '{"primaryColor": "#3b82f6", "backgroundColor": "#ffffff", "textColor": "#1e293b", "borderRadius": "8px"}'::jsonb;

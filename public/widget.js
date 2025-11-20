@@ -71,6 +71,9 @@
     createTourElements();
     showStep(0);
     
+    // Add keyboard navigation
+    document.addEventListener('keydown', handleKeyboardNavigation);
+    
     // Track tour view
     trackEvent('view');
   };
@@ -83,6 +86,7 @@
     
     state.isActive = false;
     removeTourElements();
+    document.removeEventListener('keydown', handleKeyboardNavigation);
     state.config.onSkip(state.currentStep);
   };
 
@@ -108,6 +112,7 @@
 
   TourFlow.destroy = function() {
     removeTourElements();
+    document.removeEventListener('keydown', handleKeyboardNavigation);
     state = {
       tourData: null,
       currentStep: 0,
@@ -183,6 +188,11 @@
   }
 
   function createTourElements() {
+    // Apply custom theme if available
+    if (state.tourData.theme) {
+      applyTheme(state.tourData.theme);
+    }
+
     // Criar overlay
     if (state.config.overlay) {
       const overlay = document.createElement('div');
@@ -207,6 +217,9 @@
       </div>
       <h3 class="tourflow-title"></h3>
       <p class="tourflow-content"></p>
+      <div class="tourflow-keyboard-hint" style="margin-top: 8px; font-size: 11px; color: rgba(0,0,0,0.5); text-align: center;">
+        Use ← → para navegar, Esc para fechar
+      </div>
       <div class="tourflow-actions">
         <button class="tourflow-btn tourflow-btn-secondary tourflow-prev" onclick="TourFlow.previous()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -363,6 +376,65 @@
       dot.className = `tourflow-dot ${index === state.currentStep ? 'active' : ''}`;
       dotsContainer.appendChild(dot);
     });
+  }
+
+  function applyTheme(theme) {
+    if (!theme) return;
+    
+    const styleId = 'tourflow-custom-theme';
+    let styleEl = document.getElementById(styleId);
+    
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    
+    styleEl.textContent = `
+      .tourflow-tooltip {
+        background: ${theme.backgroundColor} !important;
+        color: ${theme.textColor} !important;
+        border-radius: ${theme.borderRadius} !important;
+      }
+      .tourflow-btn-primary {
+        background: ${theme.primaryColor} !important;
+        border-radius: ${theme.borderRadius} !important;
+      }
+      .tourflow-btn-primary:hover {
+        opacity: 0.9;
+      }
+      .tourflow-btn-secondary {
+        border-radius: ${theme.borderRadius} !important;
+        color: ${theme.textColor} !important;
+        border-color: ${theme.textColor}33 !important;
+      }
+      .tourflow-keyboard-hint {
+        color: ${theme.textColor}80 !important;
+      }
+    `;
+  }
+
+  function handleKeyboardNavigation(e) {
+    if (!state.isActive) return;
+    
+    switch(e.key) {
+      case 'Escape':
+        e.preventDefault();
+        TourFlow.stop();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        TourFlow.next();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        TourFlow.previous();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        TourFlow.next();
+        break;
+    }
   }
 
   function completeTour() {

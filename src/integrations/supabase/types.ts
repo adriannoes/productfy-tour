@@ -99,6 +99,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          theme: Json | null
           updated_at: string
           user_id: string
         }
@@ -107,6 +108,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          theme?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -115,6 +117,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          theme?: Json | null
           updated_at?: string
           user_id?: string
         }
